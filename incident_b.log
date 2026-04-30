@@ -1,0 +1,11 @@
+[2024-04-05 09:11:00 UTC] INFO  api-gateway       Request latency p99=95ms (baseline)
+[2024-04-05 09:44:22 UTC] WARN  order-service     Slow DB query detected query_id=q_9031 duration=1800ms
+[2024-04-05 09:44:55 UTC] ERROR db-primary        Connection pool exhausted pool_size=100 waiting=39
+[2024-04-05 09:45:10 UTC] ERROR api-gateway       Upstream timeout service=order-service
+[2024-04-05 09:45:28 UTC] ERROR api-gateway       Circuit breaker OPEN service=order-service
+[2024-04-05 09:45:40 UTC] CRIT  platform          Order submission halted
+[2024-04-05 09:57:14 UTC] INFO  db-primary        Long-running query killed query_id=q_9031 duration=748s table=open_orders
+[2024-04-05 09:57:15 UTC] INFO  db-primary        Connection pool recovering
+[2024-04-05 09:59:00 UTC] INFO  platform          Order submission resumed
+[2024-04-05 10:15:00 UTC] INFO  db-primary        Post-incident — query q_9031 from batch job open_orders_settlement scheduled 09:30 UTC daily
+[2024-04-05 10:15:01 UTC] INFO  db-primary        Table open_orders lacks index on account_id order_date — full table scan triggered

@@ -1,0 +1,18 @@
+[2024-03-15 14:02:11 UTC] INFO  api-gateway       Request latency p99=120ms (baseline)
+[2024-03-15 14:08:44 UTC] INFO  api-gateway       Request latency p99=340ms
+[2024-03-15 14:09:01 UTC] WARN  pricing-service   Slow query detected query_id=q_4821 duration=2100ms
+[2024-03-15 14:09:15 UTC] WARN  pricing-service   Slow query detected query_id=q_4822 duration=3400ms
+[2024-03-15 14:10:33 UTC] ERROR db-primary        Connection pool exhausted pool_size=100 waiting=47
+[2024-03-15 14:10:45 UTC] ERROR api-gateway       Upstream timeout service=pricing-service timeout=5000ms
+[2024-03-15 14:11:02 UTC] ERROR api-gateway       Circuit breaker OPEN service=pricing-service
+[2024-03-15 14:11:10 UTC] CRIT  platform          Trading halted — unable to serve price quotes
+[2024-03-15 14:11:45 UTC] INFO  oncall            PagerDuty alert triggered engineer notified
+[2024-03-15 14:16:30 UTC] INFO  oncall            Engineer acknowledged investigating
+[2024-03-15 14:22:08 UTC] INFO  db-primary        Long-running query killed query_id=q_4489 duration=731s table=user_positions
+[2024-03-15 14:22:09 UTC] INFO  db-primary        Connection pool recovering waiting=12
+[2024-03-15 14:23:15 UTC] INFO  pricing-service   Query latency returning to normal
+[2024-03-15 14:24:00 UTC] INFO  api-gateway       Circuit breaker HALF-OPEN
+[2024-03-15 14:25:30 UTC] INFO  api-gateway       Circuit breaker CLOSED service recovering
+[2024-03-15 14:26:45 UTC] INFO  platform          Trading resumed
+[2024-03-15 14:45:00 UTC] INFO  db-primary        Post-incident analysis query q_4489 from batch job user_positions_recalc scheduled 14:00 UTC daily
+[2024-03-15 14:45:01 UTC] INFO  db-primary        Table user_positions lacks index on user_id position_date — full table scan triggered

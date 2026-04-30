@@ -1,0 +1,44 @@
+{
+  "incident_a": {
+    "incident_id": "incident_a",
+    "root_cause": "Missing composite index on user_positions table (user_id, position_date columns) caused scheduled batch job user_positions_recalc to perform 731-second full table scan, exhausting database connection pool during production traffic",
+    "root_cause_category": "missing_index_batch_job",
+    "contributing_factors": [
+      "user_positions_recalc batch job scheduled at 14:00 UTC during production trading hours",
+      "Database connection pool size limited to 100 connections insufficient to handle batch job plus production load",
+      "No query timeout configured for batch job queries allowing 731-second execution",
+      "pricing-service dependency on same connection pool as batch operations",
+      "Circuit breaker timeout threshold (5000ms) too high relative to user experience requirements"
+    ],
+    "historical_matches": [
+      "INC-2024-007",
+      "INC-2023-041"
+    ],
+    "same_failure_mode_as_other_incident": true,
+    "justification": "Timeline clearly shows query q_4489 from user_positions_recalc batch job ran for 731 seconds starting around 14:09, causing connection pool exhaustion at 14:10:33. Post-incident analysis at 14:45:01 explicitly identified missing index on user_id and position_date as forcing full table scan. This is categorized as missing_index_batch_job rather than just missing_index because the root cause required both the missing index AND the batch job scheduling during production hours to create the failure condition."
+  },
+  "incident_b": {
+    "incident_id": "incident_b",
+    "root_cause": "Missing composite index on open_orders table (account_id, order_date columns) caused scheduled batch job open_orders_settlement to perform 748-second full table scan, exhausting database connection pool during production traffic",
+    "root_cause_category": "missing_index_batch_job",
+    "contributing_factors": [
+      "open_orders_settlement batch job scheduled at 09:30 UTC during production business hours",
+      "Database connection pool size limited to 100 connections insufficient to handle batch job plus production load",
+      "No query timeout configured for batch job queries allowing 748-second execution",
+      "order-service dependency on same connection pool as batch operations",
+      "Circuit breaker activation at 09:45:28 eliminated all order submission capability rather than degraded service"
+    ],
+    "historical_matches": [
+      "INC-2024-007",
+      "INC-2023-041"
+    ],
+    "same_failure_mode_as_other_incident": true,
+    "justification": "Timeline shows query q_9031 from open_orders_settlement batch job ran for 748 seconds starting at 09:44:22, causing connection pool exhaustion at 09:44:55. Post-incident analysis at 10:15:01 explicitly identified missing composite index on account_id and order_date as forcing full table scan. The failure mechanism is identical to incident_a: missing database index plus batch job scheduled during production hours creates pathological query that exhausts shared connection pool."
+  },
+  "same_failure_mode": true,
+  "structured_justification": {
+    "shared_pattern": "Both incidents exhibit identical failure mode: scheduled batch jobs performing full table scans due to missing indexes on large tables (user_positions, open_orders), running during production hours (14:00 UTC, 09:30 UTC), holding database connections for 700+ seconds, exhausting the shared 100-connection pool, cascading to service timeouts, triggering circuit breakers, and halting business-critical operations (trading platform, order submission). Resolution in both cases was killing the pathological query to release connections.",
+    "key_differences": "Incident A affected pricing-service and trading operations with 15.58 minute MTTR starting at 14:09, while Incident B affected order-service and order submission with 13.33 minute MTTR starting at 09:44. Different tables (user_positions vs open_orders), different batch jobs (user_positions_recalc vs open_orders_settlement), and different business functions impacted, but the technical failure mechanism and causal chain were structurally identical.",
+    "systemic_risk": "The platform has a systemic architectural vulnerability where batch processing jobs share the same database connection pool as production services without resource isolation, query timeouts, or index validation in CI/CD. This pattern has occurred at least three times (INC-2024-007, incident_a, incident_b) in 13 months, indicating batch job scheduling and database schema management are not coordinated. Any future batch job with missing indexes or inefficient queries scheduled during business hours will reproduce this exact failure mode, causing complete business capability loss within minutes."
+  }
+}

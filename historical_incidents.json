@@ -1,0 +1,22 @@
+{
+  "historical_incidents": [
+    {
+      "id": "INC-2023-041",
+      "summary": "DB connection pool exhausted due to analytics job without query timeout",
+      "root_cause": "missing_query_timeout",
+      "mttr_minutes": 22
+    },
+    {
+      "id": "INC-2023-089",
+      "summary": "Pricing service circuit breaker opened during peak trading hours due to upstream DB latency",
+      "root_cause": "db_latency_cascade",
+      "mttr_minutes": 18
+    },
+    {
+      "id": "INC-2024-007",
+      "summary": "Batch job scheduled during trading hours caused full table scan on transactions table",
+      "root_cause": "missing_index_batch_job",
+      "mttr_minutes": 31
+    }
+  ]
+}

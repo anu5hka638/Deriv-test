@@ -1,0 +1,167 @@
+[
+  {
+    "timestamp": "2024-04-05T09:11:00+00:00",
+    "level": "INFO",
+    "service": "api-gateway",
+    "message": "Request latency p99=95ms (baseline)",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:44:22+00:00",
+    "level": "WARN",
+    "service": "order-service",
+    "message": "Slow DB query detected query_id=q_9031 duration=1800ms",
+    "parsed_fields": {
+      "query_id": "q_9031",
+      "duration_ms": 1800,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:44:55+00:00",
+    "level": "ERROR",
+    "service": "db-primary",
+    "message": "Connection pool exhausted pool_size=100 waiting=39",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": 100,
+      "waiting": 39,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:45:10+00:00",
+    "level": "ERROR",
+    "service": "api-gateway",
+    "message": "Upstream timeout service=order-service",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:45:28+00:00",
+    "level": "ERROR",
+    "service": "api-gateway",
+    "message": "Circuit breaker OPEN service=order-service",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:45:40+00:00",
+    "level": "CRIT",
+    "service": "platform",
+    "message": "Order submission halted",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:57:14+00:00",
+    "level": "INFO",
+    "service": "db-primary",
+    "message": "Long-running query killed query_id=q_9031 duration=748s table=open_orders",
+    "parsed_fields": {
+      "query_id": "q_9031",
+      "duration_ms": null,
+      "duration_seconds": 748,
+      "table": "open_orders",
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:57:15+00:00",
+    "level": "INFO",
+    "service": "db-primary",
+    "message": "Connection pool recovering",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T09:59:00+00:00",
+    "level": "INFO",
+    "service": "platform",
+    "message": "Order submission resumed",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  },
+  {
+    "timestamp": "2024-04-05T10:15:00+00:00",
+    "level": "INFO",
+    "service": "db-primary",
+    "message": "Post-incident \u2014 query q_9031 from batch job open_orders_settlement scheduled 09:30 UTC daily",
+    "parsed_fields": {
+      "query_id": "q_9031",
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": "open_orders_settlement"
+    }
+  },
+  {
+    "timestamp": "2024-04-05T10:15:01+00:00",
+    "level": "INFO",
+    "service": "db-primary",
+    "message": "Table open_orders lacks index on account_id order_date \u2014 full table scan triggered",
+    "parsed_fields": {
+      "query_id": null,
+      "duration_ms": null,
+      "duration_seconds": null,
+      "table": null,
+      "pool_size": null,
+      "waiting": null,
+      "job_name": null
+    }
+  }
+]

@@ -1,0 +1,240 @@
+{
+  "incident_a": {
+    "first_symptom": "2024-03-15T14:08:44+00:00 - API gateway observed elevated p99 request latency (340ms vs 120ms baseline), indicating downstream degradation",
+    "impact_moment": "2024-03-15T14:11:10+00:00 - Trading platform halted, unable to serve price quotes to users",
+    "resolution_trigger": "Killing the long-running query q_4489 (731s duration) on user_positions table released database connection pool resources, allowing dependent services to recover",
+    "timeline": [
+      {
+        "timestamp": "2024-03-15T14:02:11+00:00",
+        "event": "API gateway operating normally with p99 latency at 120ms baseline",
+        "causal_significance": "Establishes healthy baseline performance metrics before incident onset",
+        "supporting_log_refs": [
+          "api-gateway@2024-03-15T14:02:11+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:08:44+00:00",
+        "event": "API gateway p99 latency increased to 340ms (283% of baseline)",
+        "causal_significance": "First observable symptom indicating downstream service degradation, likely caused by database contention that had already begun",
+        "supporting_log_refs": [
+          "api-gateway@2024-03-15T14:08:44+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:09:01+00:00",
+        "event": "Pricing service detected slow query q_4821 taking 2100ms",
+        "causal_significance": "Database contention manifests as slow queries in pricing service, directly contributing to elevated API gateway latency",
+        "supporting_log_refs": [
+          "pricing-service@2024-03-15T14:09:01+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:09:15+00:00",
+        "event": "Pricing service detected another slow query q_4822 taking 3400ms",
+        "causal_significance": "Escalating query durations indicate worsening database contention, consuming more connection pool resources",
+        "supporting_log_refs": [
+          "pricing-service@2024-03-15T14:09:15+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:10:33+00:00",
+        "event": "Database connection pool exhausted (100 connections, 47 waiting)",
+        "causal_significance": "Connection pool saturation prevents new queries from executing, causing cascading timeouts in dependent services",
+        "supporting_log_refs": [
+          "db-primary@2024-03-15T14:10:33+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:10:45+00:00",
+        "event": "API gateway reports upstream timeout to pricing-service (5000ms)",
+        "causal_significance": "Direct consequence of database pool exhaustion; pricing service cannot obtain connections to serve requests",
+        "supporting_log_refs": [
+          "api-gateway@2024-03-15T14:10:45+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:11:02+00:00",
+        "event": "Circuit breaker opened for pricing-service",
+        "causal_significance": "Repeated timeout failures trigger circuit breaker, stopping all requests to pricing service to prevent further resource exhaustion",
+        "supporting_log_refs": [
+          "api-gateway@2024-03-15T14:11:02+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:11:10+00:00",
+        "event": "Trading halted - platform unable to serve price quotes",
+        "causal_significance": "Circuit breaker on pricing service prevents price quote generation, forcing business-critical trading operations to halt",
+        "supporting_log_refs": [
+          "platform@2024-03-15T14:11:10+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:11:45+00:00",
+        "event": "PagerDuty alert triggered, on-call engineer notified",
+        "causal_significance": "Critical platform outage triggers incident response process",
+        "supporting_log_refs": [
+          "oncall@2024-03-15T14:11:45+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:16:30+00:00",
+        "event": "Engineer acknowledged alert and began investigation",
+        "causal_significance": "Human intervention begins to diagnose and resolve root cause",
+        "supporting_log_refs": [
+          "oncall@2024-03-15T14:16:30+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:22:08+00:00",
+        "event": "Long-running query q_4489 killed after 731 seconds on user_positions table",
+        "causal_significance": "Terminating the pathological query immediately releases held database connections, allowing pool to begin recovery",
+        "supporting_log_refs": [
+          "db-primary@2024-03-15T14:22:08+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:22:09+00:00",
+        "event": "Database connection pool recovering, waiting queue reduced to 12",
+        "causal_significance": "Released connections allow queued requests to proceed, reducing backlog from 47 to 12",
+        "supporting_log_refs": [
+          "db-primary@2024-03-15T14:22:09+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:23:15+00:00",
+        "event": "Pricing service query latency returning to normal",
+        "causal_significance": "Available database connections restore pricing service query performance to acceptable levels",
+        "supporting_log_refs": [
+          "pricing-service@2024-03-15T14:23:15+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:24:00+00:00",
+        "event": "Circuit breaker transitioned to HALF-OPEN state",
+        "causal_significance": "Circuit breaker begins testing whether pricing service has recovered by allowing limited requests",
+        "supporting_log_refs": [
+          "api-gateway@2024-03-15T14:24:00+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:25:30+00:00",
+        "event": "Circuit breaker closed, service fully recovered",
+        "causal_significance": "Successful test requests confirm pricing service health, restoring full traffic flow",
+        "supporting_log_refs": [
+          "api-gateway@2024-03-15T14:25:30+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:26:45+00:00",
+        "event": "Trading operations resumed",
+        "causal_significance": "Full system recovery allows business-critical trading functionality to restart",
+        "supporting_log_refs": [
+          "platform@2024-03-15T14:26:45+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:45:00+00:00",
+        "event": "Root cause identified: query q_4489 from scheduled batch job user_positions_recalc (runs daily at 14:00 UTC)",
+        "causal_significance": "Post-incident analysis reveals the pathological query originated from a scheduled batch job that conflicted with production traffic",
+        "supporting_log_refs": [
+          "db-primary@2024-03-15T14:45:00+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-03-15T14:45:01+00:00",
+        "event": "Deep root cause identified: user_positions table missing index on user_id and position_date, causing full table scan",
+        "causal_significance": "Missing database index forced expensive full table scan, explaining why the batch job query consumed excessive resources and held connections for 731 seconds",
+        "supporting_log_refs": [
+          "db-primary@2024-03-15T14:45:01+00:00"
+        ]
+      }
+    ]
+  },
+  "incident_b": {
+    "first_symptom": "2024-04-05T09:44:22+00:00 - Slow DB query detected (query_id=q_9031, duration=1800ms), first observable signal of database performance degradation",
+    "impact_moment": "2024-04-05T09:45:40+00:00 - Order submission halted, marking complete loss of core business capability",
+    "resolution_trigger": "Killing the long-running query q_9031 that had been blocking database connections for 748 seconds, which immediately allowed connection pool recovery",
+    "timeline": [
+      {
+        "timestamp": "2024-04-05T09:44:22+00:00",
+        "event": "Slow database query q_9031 detected with 1800ms duration in order-service",
+        "causal_significance": "This query, originating from the daily open_orders_settlement batch job scheduled at 09:30 UTC, began consuming database resources. The query performed a full table scan on open_orders due to missing indexes on account_id and order_date columns, causing it to hold connections and locks far longer than normal queries.",
+        "supporting_log_refs": [
+          "order-service@2024-04-05T09:44:22+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:44:55+00:00",
+        "event": "Database connection pool exhausted with all 100 connections occupied and 39 requests waiting",
+        "causal_significance": "The long-running query q_9031 held database connections open while performing the full table scan, preventing connection recycling. As the query continued to run, it starved other services of available connections, creating a cascading resource exhaustion that blocked all database-dependent operations.",
+        "supporting_log_refs": [
+          "db-primary@2024-04-05T09:44:55+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:45:10+00:00",
+        "event": "API gateway experienced upstream timeout when calling order-service",
+        "causal_significance": "Order-service could not acquire database connections due to pool exhaustion, causing requests to hang until timeout. This propagated the database-layer failure up to the API gateway, beginning user-facing degradation.",
+        "supporting_log_refs": [
+          "api-gateway@2024-04-05T09:45:10+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:45:28+00:00",
+        "event": "Circuit breaker opened for order-service at API gateway",
+        "causal_significance": "Repeated timeout failures from order-service triggered the circuit breaker protection mechanism, causing the gateway to stop forwarding requests to order-service entirely. This prevented further resource waste but also blocked all order-related functionality from reaching the backend.",
+        "supporting_log_refs": [
+          "api-gateway@2024-04-05T09:45:28+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:45:40+00:00",
+        "event": "Order submission functionality completely halted",
+        "causal_significance": "The combination of circuit breaker activation and continued database unavailability resulted in total loss of order submission capability, representing full business impact and the critical severity threshold of the incident.",
+        "supporting_log_refs": [
+          "platform@2024-04-05T09:45:40+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:57:14+00:00",
+        "event": "Long-running query q_9031 forcibly killed after running for 748 seconds on open_orders table",
+        "causal_significance": "Terminating the pathological query immediately released the database connections and locks it had been holding. This was the direct remediation action that broke the resource exhaustion cycle and enabled recovery.",
+        "supporting_log_refs": [
+          "db-primary@2024-04-05T09:57:14+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:57:15+00:00",
+        "event": "Database connection pool began recovering",
+        "causal_significance": "With query q_9031 terminated, connections were released back to the pool and became available for normal operations. The 39 waiting requests could now be serviced, allowing order-service to resume database operations.",
+        "supporting_log_refs": [
+          "db-primary@2024-04-05T09:57:15+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T09:59:00+00:00",
+        "event": "Order submission functionality fully resumed",
+        "causal_significance": "With database connectivity restored, order-service health checks passed, causing the circuit breaker to close and API gateway to resume forwarding traffic. This marks complete recovery of business functionality.",
+        "supporting_log_refs": [
+          "platform@2024-04-05T09:59:00+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T10:15:00+00:00",
+        "event": "Root cause identified: query q_9031 originated from daily batch job open_orders_settlement scheduled at 09:30 UTC",
+        "causal_significance": "Post-incident analysis revealed the problematic query was part of scheduled batch processing running during business hours, explaining the timing and recurrence risk of the incident pattern.",
+        "supporting_log_refs": [
+          "db-primary@2024-04-05T10:15:00+00:00"
+        ]
+      },
+      {
+        "timestamp": "2024-04-05T10:15:01+00:00",
+        "event": "Root cause identified: open_orders table missing composite index on account_id and order_date columns",
+        "causal_significance": "The missing index forced the batch query to perform a full table scan, explaining why query q_9031 took 748 seconds instead of milliseconds. This structural database design issue was the fundamental cause enabling the incident to occur.",
+        "supporting_log_refs": [
+          "db-primary@2024-04-05T10:15:01+00:00"
+        ]
+      }
+    ]
+  }
+}
